@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+
     <link rel="stylesheet" href="/static/style.css">
+
     <title>AI Chatbot</title>
 </head>
-
 <body>
     <div class="earth-background"></div>
     <div class="hero-content">
@@ -30,9 +33,13 @@
     <div class="chat-container">
 
         <header class="chat-header">
-            <h1>AI Chatbot</h1>
-         <p>Your AI assistant · <span class="online">Online</span></p>
-        </header>
+    <div>
+        <h1>AI Chatbot</h1>
+        <p>Your AI assistant · <span class="online">Online</span></p>
+    </div>
+
+    <button id="new-chat-button">New Chat</button>
+</header>
 
         <main id="chat-box" class="chat-box">
             <div class="message bot-message">
@@ -42,12 +49,12 @@
 
         <form id="chat-form" class="chat-input-area">
 
-            <input
-                type="text"
-                id="message-input"
-                placeholder="Type your message..."
-                autocomplete="off"
-            >
+           <textarea
+    id="message-input"
+    placeholder="Type your message..."
+    autocomplete="off"
+    rows="1"
+></textarea>
 
             <button type="submit">
                 Send

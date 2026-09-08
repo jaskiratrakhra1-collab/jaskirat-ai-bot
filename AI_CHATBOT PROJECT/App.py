@@ -2,7 +2,8 @@ import os
 import uuid
 from pathlib import Path
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request
+from httpx import request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -18,8 +19,11 @@ class ChatRequest(BaseModel):
 load_dotenv(Path(__file__).with_name(".env"))
 
 api_key = os.getenv("GEMINI_API_KEY")
-client = genai.Client(api_key=api_key)
 
+if not api_key:
+    raise RuntimeError("GEMINI_API_KEY is not configured")
+
+client = genai.Client(api_key=api_key)
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -44,9 +48,16 @@ def create_session():
 
 @app.post("/chat")
 def chat(request: ChatRequest):
+    if not request.message.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Message cannot be empty"
+        )
     if request.session_id not in sessions:
-        return {"error": "Invalid session ID"}
-
+        raise HTTPException(
+            status_code=404,
+            detail="Invalid session ID"
+        )
     history = sessions[request.session_id]
 
     history.append(
@@ -56,12 +67,19 @@ def chat(request: ChatRequest):
         )
     )
 
-    response = client.models.generate_content(
-        model="gemini-3.6-flash",
-        contents=history
-    )
-
-    bot_reply = response.text
+    try:
+        response = client.models.generate_content(
+            model="gemini-3.6-flash",
+            contents=history
+        )
+        bot_reply = response.text
+    except Exception as e:
+        print("Gemini error:", e)
+        history.pop()
+        raise HTTPException(
+            status_code=503,
+            detail="AI service is temporarily unavailable"
+        )
 
     history.append(
         types.Content(
@@ -69,5 +87,4 @@ def chat(request: ChatRequest):
             parts=[types.Part(text=bot_reply)]
         )
     )
-
     return {"response": bot_reply}
