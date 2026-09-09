@@ -31,5 +31,10 @@ tqdm==4.70.0
 typing-inspection==0.4.2
 typing_extensions==4.16.0
 urllib3==2.6.3
+fastapi
+uvicorn
+jinja2
+python-dotenv
+google-genai
 uvicorn==0.39.0
 websockets==15.0.1
